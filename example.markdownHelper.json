@@ -1,0 +1,137 @@
+{
+    "version": 0,
+    "global": {
+        "base_folder": "C:\\gList2",
+        "ignore" : [
+            ".git", ".gitignore", ".gitattributes"
+        ],
+        "reports" : [
+            {
+                "target": "C:\\gList2\\reports\\AllGamesDone.md",
+                "title": "Games done",
+                "path_condition": [ "1.Owned" ],
+                "contents": [
+                    {
+                        "title": "Game done",
+                        "tag_condition": [ "DONE" ],
+                        "contents" : [
+                            {
+                                "title": "very good, hard to stop",
+                                "tag_condition": [
+                                    "DONE/1"
+                                ],
+                                "contents": [
+                                    {
+                                        "title": "%TAGNAME%",
+                                        "tag_condition": [
+                                            "CAT/"
+                                        ],
+                                        "else" : {
+                                            "title": "No category"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "title": "good, no regret",
+                                "tag_condition": [ "DONE/2" ],
+                                "contents": [
+                                    {
+                                        "title": "%TAGNAME%",
+                                        "tag_condition": [
+                                            "CAT/"
+                                        ],
+                                        "else" : {
+                                            "title": "No category"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "title": "interesting, but...",
+                                "tag_condition": [ "DONE/3" ],
+                                "contents": [
+                                    {
+                                        "title": "%TAGNAME%",
+                                        "tag_condition": [
+                                            "CAT/"
+                                        ],
+                                        "else" : {
+                                            "title": "No category"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "title": "bof",
+                                "tag_condition": [ "DONE/4" ],
+                                "contents": [
+                                    {
+                                        "title": "%TAGNAME%",
+                                        "tag_condition": [
+                                            "CAT/"
+                                        ],
+                                        "else" : {
+                                            "title": "No category"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "title" : "trash or default are preventing taking pleasure",
+                                "tag_condition" : [ "DONE/GIVUP" ],
+                                "contents": [
+                                    {
+                                        "title": "%TAGNAME%",
+                                        "tag_condition": [
+                                            "CAT/"
+                                        ],
+                                        "else" : {
+                                            "title": "No category"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "target": "C:\\Users\\nicol\\Documents\\GitHub\\gList2\\reports\\AllGamesToBeDone.md",
+                "title": "Game Not Owned",
+                "path_condition": [ "1.Owned" ],
+                "contents": [
+                    {
+                        "title": "Game done",
+                        "tag_condition": [
+                            "DONE"
+                        ],
+                        "condition_type": "not",
+                        "contents": [
+                            {
+                                "title": "%TAGNAME%",
+                                "tag_condition": [
+                                    "CAT/"
+                                ],
+                                "contents": [
+                                    {
+                                        "title": "%TAGNAME%",
+                                        "tag_condition": [
+                                            "Type/"
+                                        ],
+                                        "else": {
+                                            "title": "Game without type"
+                                        }
+                                    }
+                                ],
+                                "else": {
+                                    "title": "Game without category"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}
