@@ -30,6 +30,7 @@ VAULT = SETUP.getBloc("global")["base_folder"]
 IGNORE = SETUP.getBloc("global")["ignore"]
 REPORTS = SETUP.getBloc("global")["reports"]
 FILES = dict()
+SORTED_FILES = dict()
 TAGS = dict()
 
 print("\n====\nMarkdown Helper Version {}".format(VERSION))
@@ -62,13 +63,17 @@ def processFolder(folder, shift):
 
 
 count = processFolder(Path(VAULT), "")
+
 print("\n=================")
 print("> {} md files detected".format(count))
 print("> {} tags detected".format(len(TAGS)))
 
+for key in sorted(FILES):
+    SORTED_FILES[key] = FILES[key]
+
 try:
     for report in REPORTS:
         print("\n=================\nProcessing report \"{}\"\n=================\n".format(report["title"]))
-        MhReport(report, FILES, TAGS).generate()
+        MhReport(report, SORTED_FILES, TAGS).generate()
 except Exception as e:
     raise

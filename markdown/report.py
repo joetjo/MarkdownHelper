@@ -52,7 +52,7 @@ class MhReportEntry:
             self.tags = []
 
         try:
-            self.paths = self.json["path_condition"]
+            self.paths = self.json["pathf_condition"]
         except KeyError:
             self.paths = []
 
@@ -122,7 +122,7 @@ class MhReportEntry:
                                                            self.paths))
             if len(self.filteredFiles) > 0:
                 # virtual content that must be expanded !
-                for tag in self.mappingTags(self.tags, self.allTags):
+                for tag in sorted(self.mappingTags(self.tags, self.allTags)):
                     content = self.json.copy()
                     del content["else"]
                     content["title"] = tag[len(self.tags[0]) + 1:]  # Replace %TAGNAME% title by expended tag detected
