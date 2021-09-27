@@ -19,8 +19,6 @@ from pathlib import Path
 from markdown.markdownfile import MhMarkdownFile
 from markdown.report import MhReport
 
-VERSION = "DEV"
-
 #
 # Setup from $home/.markdownHelper
 #    ( Sample provided in example.markdownHelper.json )
@@ -32,10 +30,6 @@ REPORTS = SETUP.getBloc("global")["reports"]
 FILES = dict()
 SORTED_FILES = dict()
 TAGS = dict()
-
-print("\n====\nMarkdown Helper Version {}".format(VERSION))
-print("   | Markdown vault: {}\n====".format(VAULT))
-
 
 # folder: Path
 # shift: String ( String length provide the indentation level )
@@ -63,6 +57,7 @@ def processFolder(folder, shift):
 
 
 def markdown():
+    print("   | Markdown vault: {}\n====".format(VAULT))
     count = processFolder(Path(VAULT), "")
 
     print("\n=================")
