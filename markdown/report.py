@@ -137,31 +137,28 @@ class MhReportEntry:
 
             return
 
-        print("  | {} {} [{}->{}] ({} {})".format(LONG_BLANK[0:len(self.level) * 2], self.title(),
-                                                  len(self.inputFiles), len(self.filteredFiles), self.tags, self.paths))
+        print("  | {} {} [{}->{} / {}] ({} {})".format(LONG_BLANK[0:len(self.level) * 2], self.title(),
+                                                  len(self.inputFiles), len(self.filteredFiles), len(self.elseFiles), self.tags, self.paths))
 
         if self.isRoot:
             writer.writelines("#MarkdownHelperReport {}\n".format(datetime.now().strftime("%d/%m/%Y %H:%M:%S")))
 
+        nextLevel =   "{}#".format(self.level)
         if len(self.filteredFiles) > 0:
             writer.writelines("{} {} ({})\n".format(self.level, self.title(), len(self.filteredFiles)))
             try:
                 json_contents = self.json["contents"]
                 for content in json_contents:
-                    MhReportEntry(content, self.filteredFiles, self.allTags, "{}#".format(self.level)).generate(
+                    MhReportEntry(content, self.filteredFiles, self.allTags, nextLevel).generate(
                         writer)
             except KeyError:
                 for name, file in self.filteredFiles.items():
                     writer.writelines("- [[{}]] \n".format(name))
 
             try:
-                MhReportEntry(self.json["else"], self.elseFiles, self.allTags, self.level).generate(writer)
+                MhReportEntry(self.json["else"], self.elseFiles, self.allTags, nextLevel).generate(writer)
             except KeyError:
                 pass
-
-
-#        else:  # Empty selection
-#            writer.writelines("> None !\n")
 
 
 class MhReport:
