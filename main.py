@@ -12,6 +12,5 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from markdown.markdown import markdown
-
-markdown()
+from markdown.markdown import MarkdownHelper
+MarkdownHelper().markdown()

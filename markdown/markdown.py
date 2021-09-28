@@ -19,57 +19,59 @@ from pathlib import Path
 from markdown.markdownfile import MhMarkdownFile
 from markdown.report import MhReport
 
+
 #
 # Setup from $home/.markdownHelper
 #    ( Sample provided in example.markdownHelper.json )
 #
-SETUP = GhSetup('markdownHelper')
-VAULT = SETUP.getBloc("global")["base_folder"]
-IGNORE = SETUP.getBloc("global")["ignore"]
-REPORTS = SETUP.getBloc("global")["reports"]
-FILES = dict()
-SORTED_FILES = dict()
-TAGS = dict()
+class MarkdownHelper:
+    def __init__(self):
+        self.SETUP = GhSetup('markdownHelper')
+        self.VAULT = self.SETUP.getBloc("global")["base_folder"]
+        self.IGNORE = self.SETUP.getBloc("global")["ignore"]
+        self.REPORTS = self.SETUP.getBloc("global")["reports"]
+        self.FILES = dict()
+        self.SORTED_FILES = dict()
+        self.TAGS = dict()
 
-# folder: Path
-# shift: String ( String length provide the indentation level )
-def processFolder(folder, shift):
-    print("{}{}".format(folder, shift))
-    entryCount = 0
+    # folder: Path
+    # shift: String ( String length provide the indentation level )
+    def processFolder(self, folder, shift):
+        print("{}{}".format(folder, shift))
+        entryCount = 0
 
-    # Loop on file in current folder
-    for entry in folder.iterdir():
-        if entry.is_file() and entry.name.endswith(".md") and entry.name not in IGNORE:
-            key = entry.name[0:len(entry.name) - 3]
-            entryCount = entryCount + 1
-            mdfile = MhMarkdownFile(key, entry)
-            FILES[key] = mdfile
-            print("{}>{} {}".format(shift, key, mdfile.tags))
-            for tag in mdfile.tags:
-                TAGS[tag] = tag
+        # Loop on file in current folder
+        for entry in folder.iterdir():
+            if entry.is_file() and entry.name.endswith(".md") and entry.name not in self.IGNORE:
+                key = entry.name[0:len(entry.name) - 3]
+                entryCount = entryCount + 1
+                mdfile = MhMarkdownFile(key, entry)
+                self.FILES[key] = mdfile
+                print("{}>{} {}".format(shift, key, mdfile.tags))
+                for tag in mdfile.tags:
+                    self.TAGS[tag] = tag
 
-    # Loop on sub folder
-    for entry in folder.iterdir():
-        if not entry.is_file() and entry.name not in IGNORE:
-            entryCount = entryCount + processFolder(entry, "{}{}".format(shift, " "))
+        # Loop on sub folder
+        for entry in folder.iterdir():
+            if not entry.is_file() and entry.name not in self.IGNORE:
+                entryCount = entryCount + self.processFolder(entry, "{}{}".format(shift, " "))
 
-    return entryCount
+        return entryCount
 
+    def markdown(self):
+        print("   | Markdown vault: {}\n====".format(self.VAULT))
+        count = self.processFolder(Path(self.VAULT), "")
 
-def markdown():
-    print("   | Markdown vault: {}\n====".format(VAULT))
-    count = processFolder(Path(VAULT), "")
+        print("\n=================")
+        print("> {} md files detected".format(count))
+        print("> {} tags detected".format(len(self.TAGS)))
 
-    print("\n=================")
-    print("> {} md files detected".format(count))
-    print("> {} tags detected".format(len(TAGS)))
+        for key in sorted(self.FILES):
+            self.SORTED_FILES[key] = self.FILES[key]
 
-    for key in sorted(FILES):
-        SORTED_FILES[key] = FILES[key]
-
-    try:
-        for report in REPORTS:
-            print("\n=================\nProcessing report \"{}\"\n=================\n".format(report["title"]))
-            MhReport(report, SORTED_FILES, TAGS).generate()
-    except Exception as e:
-        raise
+        try:
+            for report in self.REPORTS:
+                print("\n=================\nProcessing report \"{}\"\n=================\n".format(report["title"]))
+                MhReport(report, self.SORTED_FILES, self.TAGS).generate()
+        except Exception as e:
+            raise
