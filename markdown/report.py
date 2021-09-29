@@ -148,9 +148,11 @@ class MhReportEntry:
             writer.writelines("{} {} ({})\n".format(self.level, self.title(), len(self.filteredFiles)))
             try:
                 json_contents = self.json["contents"]
+                files = self.filteredFiles;
                 for content in json_contents:
-                    MhReportEntry(content, self.filteredFiles, self.allTags, nextLevel).generate(
-                        writer)
+                    cr = MhReportEntry(content, files, self.allTags, nextLevel);
+                    cr.generate(writer)
+                    files = cr.elseFiles
             except KeyError:
                 for name, file in self.filteredFiles.items():
                     writer.writelines("- [[{}]] \n".format(name))
