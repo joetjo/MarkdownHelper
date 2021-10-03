@@ -22,6 +22,13 @@ To delete: del d[key]
     else:
         print ("Doesn't contains given substring")
 
+    a_string = "Hello world"
+    first_word = a_string.split()[0]
+
+substring :
+
+    string[start: end: step]
+
 # matching expr
     import re
     re.findall(r"#\w+", a_string )

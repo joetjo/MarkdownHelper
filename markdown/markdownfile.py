@@ -24,13 +24,29 @@ class MhMarkdownFile:
         # WindowsPath ( from pathLib )
         self.path = path
         self.tags = []
+        self.tagsComment = dict()
         self.loadTags()
         self.matchTag = None
 
     def loadTags(self):
         with open(self.path, 'r', encoding='utf8') as reader:
             for line in reader:
+                # Search for tag beginning of line for extended comment
+                if line.startswith("#"):
+                    lineTags = re.findall(r"^#[\w|/_-]+", line)
+                    if len(lineTags) > 0:
+                        lineTag = lineTags[0]
+                        comment = line[len(lineTag):len(line)-1]
+                        if len(comment) > 0:
+                            self.tagsComment[lineTag] = comment
+                # Extract all tags
                 self.tags.extend(re.findall(r"#[\w|/_-]+", line))
+
+    def getTagComment(self, tag):
+        try:
+            return self.tagsComment["#{}".format(tag)]
+        except KeyError:
+            return None
 
     # expr : re regexp
     def pathMatch(self, path):

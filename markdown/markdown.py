@@ -48,6 +48,8 @@ class MarkdownHelper:
                 mdfile = MhMarkdownFile(key, entry)
                 self.FILES[key] = mdfile
                 print("{}>{} {}".format(shift, key, mdfile.tags))
+                if len(mdfile.tagsComment) > 0:
+                    print("{}>>>> comments {}".format(shift, mdfile.tagsComment))
                 for tag in mdfile.tags:
                     self.TAGS[tag] = tag
 

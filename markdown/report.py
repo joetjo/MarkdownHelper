@@ -22,7 +22,10 @@ ALLOWED_ATTRIBUTES = ["target",  # 1st level only: target file path
                       "path_condition",  # optional: name list that should be used in folder path
                       "condition_type",  # if "not" --> inverse the tag_condition or path condition
                       "contents",  # sub blocs / in not defined --> leaf to print
-                      "else"]  # optional: bloc to process all entries not selected by filter
+                      "else",  # optional: bloc to process all entries not selected by filter
+                      "commentTag"  # a comment TAG is a tag that start at the beginning of the line and
+                                    # the text on the same line will be registered as a comment and shown in report.
+                      ]
 
 
 class UnknownJSonAttribute(Exception):
@@ -52,15 +55,23 @@ class MhReportEntry:
             self.tags = []
 
         try:
-            self.paths = self.json["pathf_condition"]
+            self.paths = self.json["path_condition"]
         except KeyError:
             self.paths = []
+
+        # Setup comment tag
+        try:
+            self.commentTag = self.json["commentTag"]
+        except KeyError:
+            self.commentTag = None
 
         self.inverseCondition = ""
         try:
             self.inverseCondition = self.json["condition_type"]
             if self.inverseCondition != "not":
-                raise UnknownJSonAttribute(key, json, message="Invalid value \"{}\" for attribute \"condition_type\"".format(self.inverseCondition))
+                raise UnknownJSonAttribute("condition_type", json,
+                                           message="Invalid value \"{}\" for attribute \"condition_type\""
+                                           .format(self.inverseCondition))
 
         except KeyError:
             self.paths = []
@@ -138,24 +149,32 @@ class MhReportEntry:
             return
 
         print("  | {} {} [{}->{} / {}] ({} {})".format(LONG_BLANK[0:len(self.level) * 2], self.title(),
-                                                  len(self.inputFiles), len(self.filteredFiles), len(self.elseFiles), self.tags, self.paths))
+                                                       len(self.inputFiles), len(self.filteredFiles),
+                                                       len(self.elseFiles), self.tags, self.paths))
 
         if self.isRoot:
             writer.writelines("#MarkdownHelperReport {}\n".format(datetime.now().strftime("%d/%m/%Y %H:%M:%S")))
 
-        nextLevel =   "{}#".format(self.level)
+        nextLevel = "{}#".format(self.level)
         if len(self.filteredFiles) > 0:
             writer.writelines("{} {} ({})\n".format(self.level, self.title(), len(self.filteredFiles)))
             try:
                 json_contents = self.json["contents"]
-                files = self.filteredFiles;
+                files = self.filteredFiles
                 for content in json_contents:
-                    cr = MhReportEntry(content, files, self.allTags, nextLevel);
+                    cr = MhReportEntry(content, files, self.allTags, nextLevel)
                     cr.generate(writer)
                     files = cr.elseFiles
             except KeyError:
                 for name, file in self.filteredFiles.items():
-                    writer.writelines("- [[{}]] \n".format(name))
+                    comment = ""
+                    if self.commentTag is not None:
+                        comment = file.getTagComment(self.commentTag)
+                        if comment is None:
+                            comment = ""
+                        else:
+                            comment = " | {}".format(comment)
+                    writer.writelines("- [[{}]] {} \n".format(name, comment))
 
             try:
                 MhReportEntry(self.json["else"], self.elseFiles, self.allTags, nextLevel).generate(writer)
