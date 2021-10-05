@@ -65,16 +65,14 @@ class MhReportEntry:
         except KeyError:
             self.commentTag = None
 
-        self.inverseCondition = ""
         try:
             self.inverseCondition = self.json["condition_type"]
             if self.inverseCondition != "not":
                 raise UnknownJSonAttribute("condition_type", json,
                                            message="Invalid value \"{}\" for attribute \"condition_type\""
                                            .format(self.inverseCondition))
-
         except KeyError:
-            self.paths = []
+            self.inverseCondition = []
 
         self.isFiltering = not len(self.tags) == 0 or not len(self.paths) == 0
         self.isVirtual = self.title() == "%TAGNAME%"
