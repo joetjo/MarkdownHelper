@@ -3,7 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="098ea6be-d060-4ca3-913e-bb88d6cd43df" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/markdown/report.py" beforeDir="false" afterPath="$PROJECT_DIR$/markdown/report.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/markdown/markdownfile.py" beforeDir="false" afterPath="$PROJECT_DIR$/markdown/markdownfile.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -29,10 +29,11 @@
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
-    <property name="last_opened_file_path" value="$USER_HOME$/.markdownHelper.json" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/markdown" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\nicol\PycharmProjects\markdownHelper\markdown" />
       <recent name="C:\Users\nicol\PycharmProjects\obsidianHelper" />
     </key>
   </component>
@@ -91,9 +92,9 @@
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/markdown/report.py</url>
-          <line>118</line>
-          <option name="timeStamp" value="4" />
+          <url>file://$PROJECT_DIR$/markdown/markdownfile.py</url>
+          <line>54</line>
+          <option name="timeStamp" value="1" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
