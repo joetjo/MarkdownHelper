@@ -26,6 +26,9 @@ Example [here](example.markdownHelper.json)
 - "path_condition" :  # optional: name list that should be used in folder path
 - "contents" :  # sub blocs / in not defined --> leaf to print
 - "else" :  # optional: bloc to process all entries not selected by filter``
+- "commentTag" : # a comment TAG is a tag that start at the beginning of the line and
+                                     # the text on the same line will be registered as a comment and shown in report.
+- "showTags" : # tag that start by the requested string will be added to the line
 
 Use ``%TAGNAME%`` in a tag condition with un single tag that define the prefix for a tag. Report will expand this to as many differents tags are detected that match the provided prefix. §title will be the tag name without the prefix.
 ex:

@@ -68,3 +68,11 @@ class MhMarkdownFile:
                 self.matchTag = tag
                 return True
         return False
+
+    def getTagStartingBy(self, prefix):
+        result = []
+        token = "#{}".format(prefix)
+        for tag in self.tags:
+            if tag.startswith(token):
+                result.append(tag)
+        return result

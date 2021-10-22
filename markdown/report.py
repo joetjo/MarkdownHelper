@@ -23,8 +23,9 @@ ALLOWED_ATTRIBUTES = ["target",  # 1st level only: target file path
                       "condition_type",  # if "not" --> inverse the tag_condition or path condition
                       "contents",  # sub blocs / in not defined --> leaf to print
                       "else",  # optional: bloc to process all entries not selected by filter
-                      "commentTag"  # a comment TAG is a tag that start at the beginning of the line and
-                                    # the text on the same line will be registered as a comment and shown in report.
+                      "commentTag",  # a comment TAG is a tag that start at the beginning of the line and
+                                     # the text on the same line will be registered as a comment and shown in report.
+                      "showTags"     # tag that start by the requested string will be added to the line
                       ]
 
 
@@ -64,6 +65,12 @@ class MhReportEntry:
             self.commentTag = self.json["commentTag"]
         except KeyError:
             self.commentTag = None
+
+        # Setup show tags
+        try:
+            self.showTags = self.json["showTags"]
+        except KeyError:
+            self.showTags = None
 
         try:
             self.inverseCondition = self.json["condition_type"]
@@ -171,8 +178,13 @@ class MhReportEntry:
                         if comment is None:
                             comment = ""
                         else:
-                            comment = " | {}".format(comment)
-                    writer.writelines("- [[{}]] {} \n".format(name, comment))
+                            comment = "\n> {}".format(comment)
+                    ctags = ""
+                    if self.showTags is not None:
+                        for showTag in self.showTags:
+                            for tag in file.getTagStartingBy(showTag):
+                                ctags = "{} ``{}``".format(ctags, tag[2 + len(showTag):])
+                    writer.writelines("- [[{}]] {} {} \n".format(name, ctags, comment))
 
             try:
                 MhReportEntry(self.json["else"], self.elseFiles, self.allTags, nextLevel).generate(writer)
