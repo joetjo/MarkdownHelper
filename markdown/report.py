@@ -22,6 +22,7 @@ ALLOWED_ATTRIBUTES = ["target",  # 1st level only: target file path
                       "path_condition",  # optional: name list that should be used in folder path
                       "condition_type",  # if "not" --> inverse the tag_condition or path condition
                       "contents",  # sub blocs / in not defined --> leaf to print
+                      "content_ref",    # reference to a "shared content definition" under shared_contents node
                       "else",  # optional: bloc to process all entries not selected by filter
                       "commentTag",  # a comment TAG is a tag that start at the beginning of the line and
                                      # the text on the same line will be registered as a comment and shown in report.
@@ -36,14 +37,24 @@ class UnknownJSonAttribute(Exception):
         super().__init__(self.message.format(attName, ALLOWED_ATTRIBUTES, json))
 
 
+class UnknownContentRef(Exception):
+    def __init__(self, ref, json,
+                 message="Unknown content reference \"{}\" used, json bloc:\n{}"):
+        self.message = message
+        super().__init__(self.message.format(ref, json))
+
+
 class MhReportEntry:
 
     # inputFiles: dict of name, MhMarkdownFiles
-    def __init__(self, json, inputFiles, allTags, level="#"):
+    def __init__(self, json, inputFiles, allTags, allSubContents, commentTag, showTags, level="#"):
         self.json = json
         self.level = level
         self.inputFiles = inputFiles
         self.allTags = allTags
+        self.allSubContents = allSubContents
+        self.commentTag = commentTag
+        self.showTags = showTags
 
         for key in json:
             if key not in ALLOWED_ATTRIBUTES:
@@ -59,18 +70,6 @@ class MhReportEntry:
             self.paths = self.json["path_condition"]
         except KeyError:
             self.paths = []
-
-        # Setup comment tag
-        try:
-            self.commentTag = self.json["commentTag"]
-        except KeyError:
-            self.commentTag = None
-
-        # Setup show tags
-        try:
-            self.showTags = self.json["showTags"]
-        except KeyError:
-            self.showTags = None
 
         try:
             self.inverseCondition = self.json["condition_type"]
@@ -131,6 +130,19 @@ class MhReportEntry:
                     result.append(tag)
         return result
 
+    def getContents(self):
+        try:
+            return self.json["contents"]
+        except KeyError:
+            try:
+                ref = self.json["content_ref"]
+                try:
+                    return self.allSubContents[ref]
+                except KeyError:
+                    raise UnknownContentRef(ref, self.json)
+            except KeyError:
+                return None
+
     def generate(self, writer):
         if self.isVirtual:
             print("  | {} VIRTUAL [{}->{}] ({} {})".format(LONG_BLANK[0:len(self.level) * 2],
@@ -144,10 +156,12 @@ class MhReportEntry:
                     content["title"] = tag[len(self.tags[0]) + 1:]  # Replace %TAGNAME% title by expended tag detected
                     content["tag_condition"] = [tag[1:]]  # and use the expanded tag to filer
                     if len(content["title"]) > 0:
-                        MhReportEntry(content, self.filteredFiles.copy(), self.allTags, self.level).generate(writer)
+                        MhReportEntry(content, self.filteredFiles.copy(), self.allTags,
+                                      self.allSubContents, self.commentTag, self.showTags, self.level).generate(writer)
             # Proceed to else of VIRTUAL block
             try:
-                MhReportEntry(self.json["else"], self.elseFiles, self.allTags, self.level).generate(writer)
+                MhReportEntry(self.json["else"], self.elseFiles, self.allTags,
+                              self.allSubContents, self.commentTag, self.showTags, self.level).generate(writer)
             except KeyError:
                 pass
 
@@ -163,14 +177,16 @@ class MhReportEntry:
         nextLevel = "{}#".format(self.level)
         if len(self.filteredFiles) > 0:
             writer.writelines("{} {} ({})\n".format(self.level, self.title(), len(self.filteredFiles)))
-            try:
-                json_contents = self.json["contents"]
+
+            json_contents = self.getContents()
+            if json_contents is not None:
                 files = self.filteredFiles
                 for content in json_contents:
-                    cr = MhReportEntry(content, files, self.allTags, nextLevel)
+                    cr = MhReportEntry(content, files, self.allTags, self.allSubContents,
+                                       self.commentTag, self.showTags, nextLevel)
                     cr.generate(writer)
                     files = cr.elseFiles
-            except KeyError:
+            else:
                 for name, file in self.filteredFiles.items():
                     comment = ""
                     if self.commentTag is not None:
@@ -178,7 +194,7 @@ class MhReportEntry:
                         if comment is None:
                             comment = ""
                         else:
-                            comment = "\n> {}".format(comment)
+                            comment = " | <font size=-1>{}</font>".format(comment)
                     ctags = ""
                     if self.showTags is not None:
                         for showTag in self.showTags:
@@ -187,23 +203,38 @@ class MhReportEntry:
                     writer.writelines("- [[{}]] {} {} \n".format(name, ctags, comment))
 
             try:
-                MhReportEntry(self.json["else"], self.elseFiles, self.allTags, nextLevel).generate(writer)
+                MhReportEntry(self.json["else"], self.elseFiles, self.allTags,
+                              self.allSubContents, self.commentTag, self.showTags, nextLevel).generate(writer)
             except KeyError:
                 pass
 
 
 class MhReport:
 
-    def __init__(self, json, inputFiles, allTags):
+    def __init__(self, json, inputFiles, allTags, allSubContents):
         self.json = json
         self.inputFiles = inputFiles
         self.allTags = allTags
+        self.allSubContents = allSubContents
+
+        # Setup comment tag
+        try:
+            self.commentTag = self.json["commentTag"]
+        except KeyError:
+            self.commentTag = None
+
+        # Setup show tags
+        try:
+            self.showTags = self.json["showTags"]
+        except KeyError:
+            self.showTags = None
 
     def target(self):
         return self.json["target"]
 
     def generate(self):
-        rootReport = MhReportEntry(self.json, self.inputFiles, self.allTags)
+        rootReport = MhReportEntry(self.json, self.inputFiles, self.allTags, self.allSubContents,
+                                   self.commentTag, self.showTags)
         print("Generate report \"{}\" to {}".format(rootReport.title(), self.target()))
         with open(self.target(), 'w', encoding='utf-8') as writer:
             rootReport.generate(writer)

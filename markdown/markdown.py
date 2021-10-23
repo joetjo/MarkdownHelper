@@ -30,6 +30,7 @@ class MarkdownHelper:
         self.VAULT = self.SETUP.getBloc("global")["base_folder"]
         self.IGNORE = self.SETUP.getBloc("global")["ignore"]
         self.REPORTS = self.SETUP.getBloc("global")["reports"]
+        self.SUBCONTENT = self.SETUP.getBloc("global")["shared_contents"]
         self.FILES = dict()
         self.SORTED_FILES = dict()
         self.TAGS = dict()
@@ -74,6 +75,6 @@ class MarkdownHelper:
         try:
             for report in self.REPORTS:
                 print("\n=================\nProcessing report \"{}\"\n=================\n".format(report["title"]))
-                MhReport(report, self.SORTED_FILES, self.TAGS).generate()
+                MhReport(report, self.SORTED_FILES, self.TAGS, self.SUBCONTENT).generate()
         except Exception as e:
             raise

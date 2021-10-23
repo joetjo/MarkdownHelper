@@ -46,7 +46,7 @@ class MhMarkdownFile:
 
     def getTagComment(self, tag):
         try:
-            return self.tagsComment["#{}".format(tag)]
+            return self.tagsComment["#{}".format(tag)].strip()
         except KeyError:
             return None
 
