@@ -199,7 +199,9 @@ class MhReportEntry:
                     if self.showTags is not None:
                         for showTag in self.showTags:
                             for tag in file.getTagStartingBy(showTag):
-                                ctags = "{} ``{}``".format(ctags, tag[2 + len(showTag):])
+                                stag = tag[2 + len(showTag):]
+                                if len(stag) > 0:
+                                    ctags = "{} ``{}``".format(ctags,stag)
                     writer.writelines("- [[{}]] {} {} \n".format(name, ctags, comment))
 
             try:
