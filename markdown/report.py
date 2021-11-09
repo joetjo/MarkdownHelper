@@ -22,11 +22,11 @@ ALLOWED_ATTRIBUTES = ["target",  # 1st level only: target file path
                       "path_condition",  # optional: name list that should be used in folder path
                       "condition_type",  # if "not" --> inverse the tag_condition or path condition
                       "contents",  # sub blocs / in not defined --> leaf to print
-                      "content_ref",    # reference to a "shared content definition" under shared_contents node
+                      "content_ref",  # reference to a "shared content definition" under shared_contents node
                       "else",  # optional: bloc to process all entries not selected by filter
                       "commentTag",  # a comment TAG is a tag that start at the beginning of the line and
-                                     # the text on the same line will be registered as a comment and shown in report.
-                      "showTags"     # tag that start by the requested string will be added to the line
+                      # the text on the same line will be registered as a comment and shown in report.
+                      "showTags"  # tag that start by the requested string will be added to the line
                       ]
 
 
@@ -177,6 +177,7 @@ class MhReportEntry:
         nextLevel = "{}#".format(self.level)
         if len(self.filteredFiles) > 0:
             writer.writelines("{} {} ({})\n".format(self.level, self.title(), len(self.filteredFiles)))
+            titleToGenerate = True
 
             json_contents = self.getContents()
             if json_contents is not None:
@@ -194,15 +195,24 @@ class MhReportEntry:
                         if comment is None:
                             comment = ""
                         else:
-                            comment = " | <font size=-1>{}</font>".format(comment)
+                            comment = " <font size=-1>{}</font>".format(comment)
                     ctags = ""
                     if self.showTags is not None:
                         for showTag in self.showTags:
                             for tag in file.getTagStartingBy(showTag):
                                 stag = tag[2 + len(showTag):]
                                 if len(stag) > 0:
-                                    ctags = "{} ``{}``".format(ctags,stag)
-                    writer.writelines("- [[{}]] {} {} \n".format(name, ctags, comment))
+                                    ctags = "{} ``{}``".format(ctags, stag)
+                    # Main line with game data
+#                    writer.writelines("- [[{}]] {} {} \n".format(name, ctags, comment))
+                    if self.commentTag is not None and titleToGenerate:
+                        writer.writelines("|game|tags|comment|\n")
+                        writer.writelines("|----|----|-------|\n")
+                        titleToGenerate = False
+                    if self.commentTag is not None:
+                        writer.writelines("| [[{}]] | {} | {} |\n".format(name, ctags, comment))
+                    else:
+                        writer.writelines("[[{}]]  {} \n".format(name, ctags))
 
             try:
                 MhReportEntry(self.json["else"], self.elseFiles, self.allTags,
