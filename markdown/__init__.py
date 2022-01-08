@@ -12,7 +12,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-VERSION = "1.8"
+VERSION = "1.9"
 
 
 print("\n====\nMarkdown Helper Version {}".format(VERSION))

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="098ea6be-d060-4ca3-913e-bb88d6cd43df" name="Changes" comment="">
+    <list default="true" id="098ea6be-d060-4ca3-913e-bb88d6cd43df" name="Changes" comment="use &quot;array&quot; when comment tag is set on report setup">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/markdown/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/markdown/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/markdown/markdown.py" beforeDir="false" afterPath="$PROJECT_DIR$/markdown/markdown.py" afterDir="false" />
@@ -23,6 +23,17 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="GitSEFilterConfiguration">
+    <file-type-list>
+      <filtered-out-file-type name="LOCAL_BRANCH" />
+      <filtered-out-file-type name="REMOTE_BRANCH" />
+      <filtered-out-file-type name="TAG" />
+      <filtered-out-file-type name="COMMIT_BY_MESSAGE" />
+    </file-type-list>
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
   <component name="ProjectId" id="1yRoTrxjz0k2wChHnTSXnORcZ0r" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -32,7 +43,7 @@
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/markdown" />
+    <property name="last_opened_file_path" value="$USER_HOME$/.markdownHelper.json" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
@@ -77,6 +88,21 @@
       <option name="presentableId" value="Default" />
       <updated>1632223771535</updated>
     </task>
+    <task id="LOCAL-00001" summary="remove empty showTag on report generation">
+      <created>1635404778405</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1635404778405</updated>
+    </task>
+    <task id="LOCAL-00002" summary="use &quot;array&quot; when comment tag is set on report setup">
+      <created>1636439869335</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1636439869335</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -89,6 +115,10 @@
         </entry>
       </map>
     </option>
-    <option name="oldMeFiltersMigrated" value="true" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="remove empty showTag on report generation" />
+    <MESSAGE value="use &quot;array&quot; when comment tag is set on report setup" />
+    <option name="LAST_COMMIT_MESSAGE" value="use &quot;array&quot; when comment tag is set on report setup" />
   </component>
 </project>

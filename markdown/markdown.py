@@ -75,6 +75,6 @@ class MarkdownHelper:
         try:
             for report in self.REPORTS:
                 print("\n=================\nProcessing report \"{}\"\n=================\n".format(report["title"]))
-                MhReport(report, self.SORTED_FILES, self.TAGS, self.SUBCONTENT).generate()
+                MhReport(report, self.VAULT, self.SORTED_FILES, self.TAGS, self.SUBCONTENT).generate()
         except Exception as e:
             raise

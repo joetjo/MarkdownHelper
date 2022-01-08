@@ -14,6 +14,8 @@
 from datetime import datetime
 
 # Ugly but simple
+from markdown.label import MhLabels
+
 LONG_BLANK = "                                                                                                         "
 
 ALLOWED_ATTRIBUTES = ["target",  # 1st level only: target file path
@@ -26,7 +28,10 @@ ALLOWED_ATTRIBUTES = ["target",  # 1st level only: target file path
                       "else",  # optional: bloc to process all entries not selected by filter
                       "commentTag",  # a comment TAG is a tag that start at the beginning of the line and
                       # the text on the same line will be registered as a comment and shown in report.
-                      "showTags"  # tag that start by the requested string will be added to the line
+                      "showTags",  # tag that start by the requested string will be added to the line
+                      "labelAbout",
+                      "labelTags",
+                      "labelComment"
                       ]
 
 
@@ -47,7 +52,7 @@ class UnknownContentRef(Exception):
 class MhReportEntry:
 
     # inputFiles: dict of name, MhMarkdownFiles
-    def __init__(self, json, inputFiles, allTags, allSubContents, commentTag, showTags, level="#"):
+    def __init__(self, json, inputFiles, allTags, allSubContents, commentTag, showTags, labels=None, level="#"):
         self.json = json
         self.level = level
         self.inputFiles = inputFiles
@@ -55,6 +60,10 @@ class MhReportEntry:
         self.allSubContents = allSubContents
         self.commentTag = commentTag
         self.showTags = showTags
+        if labels is None:
+            self.labels = MhLabels(json)
+        else:
+            self.labels = labels
 
         for key in json:
             if key not in ALLOWED_ATTRIBUTES:
@@ -157,11 +166,11 @@ class MhReportEntry:
                     content["tag_condition"] = [tag[1:]]  # and use the expanded tag to filer
                     if len(content["title"]) > 0:
                         MhReportEntry(content, self.filteredFiles.copy(), self.allTags,
-                                      self.allSubContents, self.commentTag, self.showTags, self.level).generate(writer)
+                                      self.allSubContents, self.commentTag, self.showTags, self.labels, self.level).generate(writer)
             # Proceed to else of VIRTUAL block
             try:
                 MhReportEntry(self.json["else"], self.elseFiles, self.allTags,
-                              self.allSubContents, self.commentTag, self.showTags, self.level).generate(writer)
+                              self.allSubContents, self.commentTag, self.showTags, self.labels, self.level).generate(writer)
             except KeyError:
                 pass
 
@@ -184,18 +193,18 @@ class MhReportEntry:
                 files = self.filteredFiles
                 for content in json_contents:
                     cr = MhReportEntry(content, files, self.allTags, self.allSubContents,
-                                       self.commentTag, self.showTags, nextLevel)
+                                       self.commentTag, self.showTags, self.labels, nextLevel)
                     cr.generate(writer)
                     files = cr.elseFiles
             else:
                 for name, file in self.filteredFiles.items():
                     comment = ""
                     if self.commentTag is not None:
-                        comment = file.getTagComment(self.commentTag)
-                        if comment is None:
-                            comment = ""
-                        else:
-                            comment = " <font size=-1>{}</font>".format(comment)
+                        comments = file.getTagComment(self.commentTag)
+                        if comments is not None:
+                            for val in comments:
+                                if val is not None:
+                                    comment = comment + " <font size=-1>{}</font><br>".format(val.strip())
                     ctags = ""
                     if self.showTags is not None:
                         for showTag in self.showTags:
@@ -203,10 +212,10 @@ class MhReportEntry:
                                 stag = tag[2 + len(showTag):]
                                 if len(stag) > 0:
                                     ctags = "{} ``{}``".format(ctags, stag)
-                    # Main line with game data
+                    # Main line with entry found data
 #                    writer.writelines("- [[{}]] {} {} \n".format(name, ctags, comment))
                     if self.commentTag is not None and titleToGenerate:
-                        writer.writelines("|game|tags|comment|\n")
+                        writer.writelines("|{}|{}|{}|\n".format(self.labels.about, self.labels.tags, self.labels.comment))
                         writer.writelines("|----|----|-------|\n")
                         titleToGenerate = False
                     if self.commentTag is not None:
@@ -216,15 +225,16 @@ class MhReportEntry:
 
             try:
                 MhReportEntry(self.json["else"], self.elseFiles, self.allTags,
-                              self.allSubContents, self.commentTag, self.showTags, nextLevel).generate(writer)
+                              self.allSubContents, self.commentTag, self.showTags, self.labels, nextLevel).generate(writer)
             except KeyError:
                 pass
 
 
 class MhReport:
 
-    def __init__(self, json, inputFiles, allTags, allSubContents):
+    def __init__(self, json, baseFolder, inputFiles, allTags, allSubContents):
         self.json = json
+        self.baseFolder = baseFolder
         self.inputFiles = inputFiles
         self.allTags = allTags
         self.allSubContents = allSubContents
@@ -242,7 +252,7 @@ class MhReport:
             self.showTags = None
 
     def target(self):
-        return self.json["target"]
+        return self.baseFolder + '/' + self.json["target"]
 
     def generate(self):
         rootReport = MhReportEntry(self.json, self.inputFiles, self.allTags, self.allSubContents,

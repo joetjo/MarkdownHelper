@@ -36,9 +36,14 @@ class MhMarkdownFile:
                     lineTags = re.findall(r"^#[\w|/_-]+", line)
                     if len(lineTags) > 0:
                         lineTag = lineTags[0]
-                        comment = line[len(lineTag):len(line)-1]
+                        comment = line[len(lineTag):len(line) - 1]
                         if len(comment) > 0:
-                            self.tagsComment[lineTag] = comment
+                            try:
+                                comments = self.tagsComment[lineTag]
+                            except KeyError:
+                                comments = []
+                                self.tagsComment[lineTag] = comments
+                            comments.append(comment)
                 # Extract all tags
                 rawTags = re.findall(r"#[\w|/_-]+[\s\S]", line)
                 for tag in rawTags:
@@ -46,7 +51,7 @@ class MhMarkdownFile:
 
     def getTagComment(self, tag):
         try:
-            return self.tagsComment["#{}".format(tag)].strip()
+            return self.tagsComment["#{}".format(tag)]
         except KeyError:
             return None
 
