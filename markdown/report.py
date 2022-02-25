@@ -22,8 +22,11 @@ ALLOWED_ATTRIBUTES = ["target",  # 1st level only: target file path
                       "title",  # mandatory on each bloc
                       "tag_condition",  # optional: tag list to filter content ( can be tag prefix )
                       "path_condition",  # optional: name list that should be used in folder path
+                      "tag_not_condition",  # optional: tag list to filter content ( can be tag prefix ) ONLY IN COUNT BLOC
+                      "path_not_condition",  # optional: name list that should be used in folder path ONLY IN COUNT BLOC
                       "condition_type",  # if "not" --> inverse the tag_condition or path condition
                       "contents",  # sub blocs / in not defined --> leaf to print
+                      "count",  # sub blocs / statistic bloc
                       "content_ref",  # reference to a "shared content definition" under shared_contents node
                       "else",  # optional: bloc to process all entries not selected by filter
                       "commentTag",  # a comment TAG is a tag that start at the beginning of the line and
@@ -47,6 +50,75 @@ class UnknownContentRef(Exception):
                  message="Unknown content reference \"{}\" used, json bloc:\n{}"):
         self.message = message
         super().__init__(self.message.format(ref, json))
+
+
+class MhCountEntry:
+
+    def __init__(self, json, inputFiles):
+        self.json = json
+        self.inputFiles = inputFiles
+        self.count = 0
+
+        for key in json:
+            if key not in ALLOWED_ATTRIBUTES:
+                raise UnknownJSonAttribute(key, json)
+
+        # Setup content filter
+        try:
+            self.tags = self.json["tag_condition"]
+        except KeyError:
+            self.tags = []
+
+        try:
+            self.not_tags = self.json["tag_not_condition"]
+        except KeyError:
+            self.not_tags = []
+
+        try:
+            self.paths = self.json["path_condition"]
+        except KeyError:
+            self.paths = []
+
+        try:
+            self.not_paths = self.json["path_not_condition"]
+        except KeyError:
+            self.not_paths = []
+
+        for name, file in self.inputFiles.items():
+            if self.matchCondition(file):
+                self.count = self.count + 1
+
+    # Returns True if file match report condition
+    def matchCondition(self, file):
+        resultByTag = True
+        resultByPath = True
+        resultByNotTag = True
+        resultByNotPath = True
+
+        for tag in self.tags:
+            if not file.hasTagStartingBy(tag):
+                resultByTag = False
+                break
+
+        for tag in self.not_tags:
+            if file.hasTagStartingBy(tag):
+                resultByNotTag = False
+                break
+
+        for path in self.paths:
+            if not file.pathMatch(path):
+                resultByPath = False
+                break
+
+        for path in self.not_paths:
+            if file.pathMatch(path):
+                resultByNotPath = False
+                break
+
+        return resultByTag and resultByPath and resultByNotTag and resultByNotPath
+
+    def getCount(self):
+        return self.count
 
 
 class MhReportEntry:
@@ -152,6 +224,12 @@ class MhReportEntry:
             except KeyError:
                 return None
 
+    def getCount(self):
+        try:
+            return self.json["count"]
+        except KeyError:
+            return None
+
     def generate(self, writer):
         if self.isVirtual:
             print("  | {} VIRTUAL [{}->{}] ({} {})".format(LONG_BLANK[0:len(self.level) * 2],
@@ -197,31 +275,37 @@ class MhReportEntry:
                     cr.generate(writer)
                     files = cr.elseFiles
             else:
-                for name, file in self.filteredFiles.items():
-                    comment = ""
-                    if self.commentTag is not None:
-                        comments = file.getTagComment(self.commentTag)
-                        if comments is not None:
-                            for val in comments:
-                                if val is not None:
-                                    comment = comment + " <font size=-1>{}</font><br>".format(val.strip())
-                    ctags = ""
-                    if self.showTags is not None:
-                        for showTag in self.showTags:
-                            for tag in file.getTagStartingBy(showTag):
-                                stag = tag[2 + len(showTag):]
-                                if len(stag) > 0:
-                                    ctags = "{} ``{}``".format(ctags, stag)
-                    # Main line with entry found data
-#                    writer.writelines("- [[{}]] {} {} \n".format(name, ctags, comment))
-                    if self.commentTag is not None and titleToGenerate:
-                        writer.writelines("|{}|{}|{}|\n".format(self.labels.about, self.labels.tags, self.labels.comment))
-                        writer.writelines("|----|----|-------|\n")
-                        titleToGenerate = False
-                    if self.commentTag is not None:
-                        writer.writelines("| [[{}]] | {} | {} |\n".format(name, ctags, comment))
-                    else:
-                        writer.writelines("[[{}]]  {} \n".format(name, ctags))
+                json_count = self.getCount()
+                if json_count is not None:
+                    writer.writelines("|What|Count|\n|-|-|")
+                    for key, value in json_count.items():
+                        writer.writelines("\n| {} | {} |".format(key, MhCountEntry(value, self.filteredFiles).getCount()))
+                else:
+                    for name, file in self.filteredFiles.items():
+                        comment = ""
+                        if self.commentTag is not None:
+                            comments = file.getTagComment(self.commentTag)
+                            if comments is not None:
+                                for val in comments:
+                                    if val is not None:
+                                        comment = comment + " <font size=-1>{}</font><br>".format(val.strip())
+                        ctags = ""
+                        if self.showTags is not None:
+                            for showTag in self.showTags:
+                                for tag in file.getTagStartingBy(showTag):
+                                    stag = tag[2 + len(showTag):]
+                                    if len(stag) > 0:
+                                        ctags = "{} ``{}``".format(ctags, stag)
+                        # Main line with entry found data
+    #                    writer.writelines("- [[{}]] {} {} \n".format(name, ctags, comment))
+                        if self.commentTag is not None and titleToGenerate:
+                            writer.writelines("|{}|{}|{}|\n".format(self.labels.about, self.labels.tags, self.labels.comment))
+                            writer.writelines("|----|----|-------|\n")
+                            titleToGenerate = False
+                        if self.commentTag is not None:
+                            writer.writelines("| [[{}]] | {} | {} |\n".format(name, ctags, comment))
+                        else:
+                            writer.writelines("[[{}]]  {} \n".format(name, ctags))
 
             try:
                 MhReportEntry(self.json["else"], self.elseFiles, self.allTags,
