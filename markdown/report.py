@@ -207,7 +207,7 @@ class MhReportEntry:
         for token in tags:
             token = "#{}".format(token)
             for tag in allTags:
-                if tag.startswith(token):
+                if tag.startswith(token) and not tag.endswith("/"):
                     result.append(tag)
         return result
 
